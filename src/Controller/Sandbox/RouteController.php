@@ -3,17 +3,29 @@
 namespace App\Controller\Sandbox;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class RouteController extends AbstractController
+#[Route('/sandbox/route', name: 'sandbox_route')]
+class RouteController extends AbstractController
 {
-    #[Route('/sandbox/route', name: 'app_sandbox_route')]
-    public function index(): JsonResponse
+    #[Route(
+        '/with-variable/{age}',
+        name: '_with_variable'
+    )]
+    public function withVariableAction($age): Response
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/Sandbox/RouteController.php',
-        ]);
+        return new Response('<body>Route::withVariable : age = ' . $age . '</body>');
+    }
+
+    #[Route(
+        '/with-default/{age}',
+        name: '_with_default',
+        defaults: ['age' => 18],
+    )]
+    public function withDefaultAction($age): Response
+    {
+        dump($age);
+        return new Response('<body>Route::withDefault : age = ' . $age . ' (' . gettype($age) . ')</body>');
     }
 }
