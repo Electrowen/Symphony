@@ -28,4 +28,33 @@ class RouteController extends AbstractController
         dump($age);
         return new Response('<body>Route::withDefault : age = ' . $age . ' (' . gettype($age) . ')</body>');
     }
+
+    #[Route(
+        '/with-constraint/{age}',
+        name: '_with_constraint',
+        requirements: ['age' => '0|[1-9]\d*'],
+        defaults: ['age' => 18],
+    )]
+    public function withConstraintAction($age): Response
+    {
+        dump($age);
+        return new Response('<body>Route::withConstraint : age = ' . $age . ' (' . gettype($age) . ')</body>');
+    }
+
+    #[Route(
+        '/test1/{year}/{month}/{filename}.{ext}',
+        name: '_test1',
+    )]
+    public function test1Action($year, $month, $filename, $ext): Response
+    {
+        $args = array(
+            'title' => 'test1',
+            'year' => $year,
+            'month' => $month,
+            'filename' => $filename,
+            'ext' => $ext,
+        );
+        return $this->render('Sandbox/Route/test1234.html.twig', $args);
+
+    }
 }
