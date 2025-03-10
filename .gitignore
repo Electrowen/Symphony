@@ -15,3 +15,6 @@
 # exclusion du répertoire de configuratrion de PhpStorm
 .idea
 
+# exclusion du répertoire des bases de données SQLite
+/database
+
