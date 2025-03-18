@@ -16,9 +16,8 @@ class DoctrineController extends AbstractController
     {
         $filmRepository = $em->getRepository(Film::class);
         $films = $filmRepository->findAll();
-        dump($films);
-
         $args = array(
+            'films' => $films,
         );
         return $this->render('Sandbox/Doctrine/list.html.twig', $args);
     }
@@ -28,9 +27,14 @@ class DoctrineController extends AbstractController
         name: '_view',
         requirements: ['id' => '[1-9]\d*'],
     )]
-    public function viewAction(int $id): Response
+    public function viewAction(int $id, EntityManagerInterface $em): Response
     {
+        $filmRepository = $em->getRepository(Film::class);
+        $film = $filmRepository->find($id);
+        // normalement un $film à null devrait être traité ici (exception par exemple)
         $args = array(
+            'film' => $film,    // film peut être null, c'est la vue qui gérera
+            'id' => $id,        // utile uniquement si le film n'existe pas
         );
         return $this->render('Sandbox/Doctrine/view.html.twig', $args);
     }
@@ -40,11 +44,25 @@ class DoctrineController extends AbstractController
         name: '_delete',
         requirements: ['id' => '[1-9]\d*'],
     )]
-    public function deleteAction(int $id): Response
+    public function deleteAction(int $id, EntityManagerInterface $em): Response
     {
+        $filmRepository = $em->getRepository(Film::class);
+        $film = $filmRepository->find($id);
+
+        if (is_null($film))
+        {
+            $this->addFlash('info', 'suppression film ' . $id . ' : échec');
+            throw new NotFoundHttpException('film ' . $id . ' inconnu');
+            //throw $this->createNotFoundException('film ' . $id . ' inconnu');
+        }
+
+        $em->remove($film);      // le paramètre est l'objet et non pas l'id
+        $em->flush();
         $this->addFlash('info', 'suppression film ' . $id . ' réussie');
+
         return $this->redirectToRoute('sandbox_doctrine_list');
     }
+
 
     #[Route('/ajouterendur', name: '_ajouterendur')]
     public function ajouterendurAction(EntityManagerInterface $em): Response
@@ -63,5 +81,37 @@ class DoctrineController extends AbstractController
         dump($film);
 
         return $this->redirectToRoute('sandbox_doctrine_view', ['id' => $film->getId()]);
+    }
+
+    #[Route('/modifierendur', name: '_modifierendur')]
+    public function modifierendurAction(EntityManagerInterface $em): Response
+    {
+        $id = 1;
+        $filmRepository = $em->getRepository(Film::class);
+        $film = $filmRepository->find($id);
+        // normalement il faut tester si $film est null
+        $film
+            ->setPrix(15.98)
+            ->setQuantite($film->getQuantite() + 10);
+
+        //$em->persist($film);   // inutile, c'est automatiqe
+        $em->flush();            // ne pas oublier sinon rien ne se passe
+
+        return $this->redirectToRoute('sandbox_doctrine_view', ['id' => $film->getId()]);
+    }
+
+    #[Route('/effacerendur', name: '_effacerendur')]
+    public function effacerendurAction(EntityManagerInterface $em): Response
+    {
+        $id = 1;
+        $filmRepository = $em->getRepository(Film::class);
+        $film = $filmRepository->find($id);
+        // normalement il faut tester si $film est null
+
+        //$em->persist($film);   // inutile, c'est automatiqe
+        $em->remove($film);      // le paramètre est l'objet et non pas l'id
+        $em->flush();            // ne pas oublier sinon rien ne se passe
+
+        return $this->redirectToRoute('sandbox_doctrine_list');
     }
 }
