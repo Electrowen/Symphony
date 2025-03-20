@@ -21,7 +21,7 @@ class Produit
     private ?string $code = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date_creation = null;
+    private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private ?bool $actif = null;
@@ -33,6 +33,17 @@ class Produit
     {
         return $this->id;
     }
+
+
+    /**
+     * Produit constructor
+     */
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime();
+        $this->actif = false;
+    }
+
 
     public function getDenomination(): ?string
     {
@@ -60,12 +71,12 @@ class Produit
 
     public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->date_creation;
+        return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeInterface $date_creation): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
-        $this->date_creation = $date_creation;
+        $this->dateCreation = $dateCreation;
 
         return $this;
     }
